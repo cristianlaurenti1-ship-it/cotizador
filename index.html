@@ -1,26 +1,67 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>cristianLaurenti Entrega1</title>
-    <script defer src="./js/main.js"></script>
-</head>
-<body>
-    <h1>Simulador de Cotización - Construcción en Seco</h1>
-    
-    <div>
-        <h2>Descripción del Simulador</h2>
-        <p>Este simulador permite calcular el presupuesto para construcciones en seco bajo dos modalidades:</p>
-        <ul>
-            <li><strong>Llave en mano:</strong> Construcción completa con un valor fijo de $840,000 por metro cuadrado.</li>
-            <li><strong>Semillave en mano:</strong> Construcción parcial con un valor de $550,000 por metro cuadrado.</li>
-        </ul>
-        <p>Para comenzar la cotización, presione F12 para ver la consola y siga las instrucciones.</p>
-    </div>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Simulador de Cotización - Construcción en Seco</title>
+        <link rel="stylesheet" href="./css/styles.css">
+        <script defer src="./js/main.js"></script>
+    </head>
+    <body>
+        <header>
+            <h1>Simulador de Cotización - Construcción en Seco</h1>
+            <p class="lead">Calcula el presupuesto según modalidad y metros cuadrados. Los resultados se muestran aquí y en el historial (guardado en localStorage).</p>
+        </header>
+
+        <main class="container">
+            <section class="card">
+                <h2>Formulario de Cotización</h2>
+                <form id="formCotizacion">
+                    <label for="metros">Metros cuadrados</label>
+                    <input type="number" id="metros" name="metros" min="1" step="1" required>
+
+                    <fieldset>
+                        <legend>Tipo de construcción</legend>
+                        <label><input type="radio" name="tipo" value="Llave en mano" checked> Llave en mano ($840.000/m²)</label>
+                        <label><input type="radio" name="tipo" value="Semillave en mano"> Semillave en mano ($550.000/m²)</label>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Servicios opcionales</legend>
+                        <!-- Los servicios se generarán desde JS -->
+                        <div id="serviciosContainer"></div>
+                    </fieldset>
+
+                    <div class="actions">
+                        <button type="submit" id="btnCalcular">Calcular</button>
+                        <button type="button" id="btnLimpiar">Limpiar</button>
+                    </div>
+                </form>
+            </section>
+
+            <section id="resultado" class="card hidden">
+                <h2>Resultado</h2>
+                <p><strong>Metros:</strong> <span id="outMetros">-</span></p>
+                <p><strong>Tipo:</strong> <span id="outTipo">-</span></p>
+                <p><strong>Servicios seleccionados:</strong></p>
+                <ul id="outServicios"></ul>
+                <p class="total"><strong>Total:</strong> $<span id="outTotal">0</span></p>
+            </section>
+
+            <section id="historial" class="card">
+                <h2>Historial de Cotizaciones</h2>
+                <div class="historial-actions">
+                    <label>Filtrar por tipo:
+                        <select id="filterTipo">
+                            <option value="all">Todas</option>
+                            <option value="Llave en mano">Llave en mano</option>
+                            <option value="Semillave en mano">Semillave en mano</option>
+                        </select>
+                    </label>
+                    <button id="btnBorrarHistorial" title="Borrar historial">Borrar historial</button>
+                </div>
+                <ul id="listaHistorial"></ul>
+            </section>
+        </main>
+    </body>
 </html>
-
-
-  
-
