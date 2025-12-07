@@ -1,0 +1,6 @@
+[
+  { "id": "s1", "name": "Remodelación ligera", "price": 200000 },
+  { "id": "s2", "name": "Instalación de cocina", "price": 350000 },
+  { "id": "s3", "name": "Aislación térmica", "price": 150000 },
+  { "id": "s4", "name": "Pintura interior", "price": 80000 }
+]

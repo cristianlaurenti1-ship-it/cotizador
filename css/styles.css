@@ -1,4 +1,4 @@
-/* Estilos básicos para el Simulador */
+
 body{
   font-family: Arial, Helvetica, sans-serif;
   background: #f5f7fb;
@@ -35,4 +35,6 @@ button{ padding:8px 12px; border-radius:4px; border:none; cursor:pointer }
 .historial-actions{ display:flex; gap:8px; align-items:center; margin-bottom:8px }
 #btnBorrarHistorial{ background:#dc3545; color:#fff }
 .servicio-item{ display:flex; gap:8px; align-items:center }
+.hist-servicios{ margin:6px 0 0 12px; padding-left:12px }
+.hist-servicios li{ font-size:0.95rem; color:#444 }
 @media(min-width:800px){ .container{ grid-template-columns: 1fr 1fr } }

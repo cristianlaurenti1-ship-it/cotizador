@@ -1,22 +1,8 @@
-// ==========================
-// Simulador: reemplazo de alert/console por mensajes en el DOM
-// ==========================
-
-// Precios por metro
 const PRECIO_LLAVE_EN_MANO = 840000;
 const PRECIO_SEMILLAVE_EN_MANO = 550000;
 
-// Servicios disponibles (id, nombre, precio)
-const SERVICIOS = [
-    { id: 's1', name: 'Remodelación ligera', price: 200000 },
-    { id: 's2', name: 'Instalación de cocina', price: 350000 },
-    { id: 's3', name: 'Aislación térmica', price: 150000 },
-    { id: 's4', name: 'Pintura interior', price: 80000 }
-];
+let SERVICIOS = [];
 
-const STORAGE_KEY = 'simulador_presupuestos';
-
-// Elementos del DOM (esperamos que existan en index.html)
 const form = document.getElementById('formCotizacion');
 const serviciosContainer = document.getElementById('serviciosContainer');
 const resultadoSection = document.getElementById('resultado');
@@ -29,7 +15,6 @@ const filterTipo = document.getElementById('filterTipo');
 const btnBorrarHistorial = document.getElementById('btnBorrarHistorial');
 const btnLimpiar = document.getElementById('btnLimpiar');
 
-// Elemento de estado para mensajes al usuario (se crea si no existe)
 function getStatusElement() {
     let status = document.getElementById('statusMessage');
     if (!status) {
@@ -42,7 +27,11 @@ function getStatusElement() {
     return status;
 }
 
-function showStatus(message, timeoutMs) {
+function showStatus(message, timeoutMs = 3000) {
+        if (window.Toastify) {
+        Toastify({ text: message, duration: timeoutMs, gravity: 'top', position: 'right', close: true }).showToast();
+        return;
+    }
     const status = getStatusElement();
     status.textContent = message;
     if (timeoutMs) {
@@ -50,7 +39,6 @@ function showStatus(message, timeoutMs) {
     }
 }
 
-// Cargar y guardar historial en localStorage
 function cargarHistorial() {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
@@ -59,9 +47,19 @@ function guardarHistorial(hist) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(hist));
 }
 
-// servicios
-function renderServicios() {
+async function renderServicios() {
     if (!serviciosContainer) return;
+    
+    if (!SERVICIOS || SERVICIOS.length === 0) {
+        try {
+            const res = await fetch('./data/services.json');
+            if (!res.ok) throw new Error('No se pudo cargar services.json');
+            SERVICIOS = await res.json();
+        } catch (err) {
+            showStatus('Error cargando servicios: ' + err.message, 5000);
+            return;
+        }
+    }
     serviciosContainer.innerHTML = '';
     SERVICIOS.forEach(s => {
         const div = document.createElement('div');
@@ -79,14 +77,12 @@ function renderServicios() {
     });
 }
 
-// obtiene valores del formulario
 function solicitarDatosUsuario() {
     if (!form) return null;
     const metros = Number(document.getElementById('metros').value);
     const tipoInput = document.querySelector('input[name="tipo"]:checked');
     const tipo = tipoInput ? tipoInput.value : null;
 
-    // servicios seleccionados
     const seleccionados = [];
     SERVICIOS.forEach(s => {
         const cb = document.getElementById(s.id);
@@ -96,7 +92,6 @@ function solicitarDatosUsuario() {
     return { metros, tipo, servicios: seleccionados };
 }
 
-// calcularPresupuesto: calcula base + servicios
 function calcularPresupuesto(datos) {
     const precioMetro = datos.tipo === 'Llave en mano' ? PRECIO_LLAVE_EN_MANO : PRECIO_SEMILLAVE_EN_MANO;
     const base = datos.metros * precioMetro;
@@ -105,7 +100,6 @@ function calcularPresupuesto(datos) {
     return { base, serviciosTotal, total };
 }
 
-// mostrarResultado: actualiza el DOM con los resultados
 function mostrarResultado(datos, calculo) {
     if (!resultadoSection) return;
     outMetros.textContent = datos.metros + ' m²';
@@ -125,7 +119,6 @@ function mostrarResultado(datos, calculo) {
     outTotal.textContent = calculo.total.toLocaleString();
     resultadoSection.classList.remove('hidden');
 
-    // Guardar en historial
     const historial = cargarHistorial();
     historial.push({ id: Date.now(), fecha: new Date().toLocaleString(), metros: datos.metros, tipo: datos.tipo, servicios: datos.servicios.map(s => s.name), total: calculo.total });
     guardarHistorial(historial);
@@ -133,7 +126,6 @@ function mostrarResultado(datos, calculo) {
     showStatus('Cotización calculada correctamente', 3000);
 }
 
-// renderHistorial: muestra historial usando filter si aplica
 function renderHistorial() {
     if (!listaHistorial) return;
     const all = cargarHistorial();
@@ -146,7 +138,6 @@ function renderHistorial() {
     }
     items.forEach(item => {
         const li = document.createElement('li');
-        // detalle de servicios
         let serviciosHtml = '';
         if (item.servicios && item.servicios.length > 0) {
             serviciosHtml = '<ul class="hist-servicios">';
@@ -163,7 +154,6 @@ function renderHistorial() {
     });
 }
 
-// limpiar formulario
 function limpiarFormulario() {
     if (!form) return;
     form.reset();
@@ -171,14 +161,12 @@ function limpiarFormulario() {
     showStatus('Formulario limpiado', 2000);
 }
 
-// borrar historial
 function borrarHistorial() {
-    localStorage.removeItem(STORAGE_KEY);
+    borrarHistorialStorage();
     renderHistorial();
     showStatus('Historial borrado', 2000);
 }
 
-// iniciarSimulador: registrar eventos fuera del HTML
 function iniciarSimulador() {
     renderServicios();
     if (form) {
